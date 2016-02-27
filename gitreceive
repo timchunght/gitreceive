@@ -94,8 +94,17 @@ ensure_prereceive_hook() {
   local hook_path="$repo_path/hooks/pre-receive"
   cd "$home_dir"
   cat > "$hook_path" <<EOF
-#!/bin/bash
-cat | $self hook
+ #!/bin/bash
+ echo hello
+ while read oldrev newrev refname; do
+
+   COMMIT=\$newrev
+ done
+
+ REPO_PATH=\$(pwd)
+ echo \$REPO_PATH
+ echo \$COMMIT
+ winston build --commit=\$COMMIT --repo=\$REPO_PATH
 EOF
   chmod +x "$hook_path"
   cd - > /dev/null
@@ -112,7 +121,7 @@ trigger_receiver() {
     # Only run this script for the master branch. You can remove this
     # if block if you wish to run it for others as well.
     [[ "$refname" == "refs/heads/master" ]] && \
-      git archive "$newrev" | "$home_dir/receiver" "$repo" "$newrev" "$user" "$fingerprint"
+      "$home_dir/receiver" "$repo" "$newrev" "$user" "$fingerprint"
   done
 }
 
